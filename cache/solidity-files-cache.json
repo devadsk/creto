@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\UHD EDITOR\\Desktop\\Deva\\ProjectDT\\contracts\\OwnChain.sol": {
+      "lastModificationDate": 1739252792255,
+      "contentHash": "7c9d818c33160bdb837ba0e79a69370b",
+      "sourceName": "contracts/OwnChain.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "OwnChain"
+      ]
+    }
+  }
+}
