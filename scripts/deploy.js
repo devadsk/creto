@@ -7,7 +7,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Creto = await hre.ethers.getContractFactory("OwnChain");
+  const Creto = await hre.ethers.getContractFactory("Creto");
   const creto = await Creto.deploy();
 
   await creto.waitForDeployment();
