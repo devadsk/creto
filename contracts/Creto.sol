@@ -1,44 +1,69 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
 contract Creto {
-    struct Ownership {
-        address ownerAddress;
-        uint256 datePurchased;
-    }
-
-    struct Document {
-        string documentHash; // Hash of the document
-        string documentName;
-        uint256 timestamp; // Real-world timestamp
+    struct Certificate {
+        string hash;
+        string name;
+        uint256 timestamp;
         address owner;
+        address creator;
+        uint8 royalty;
+        string verificationProof;
     }
 
-    mapping(string => Document) public documents;
-    mapping(string => Ownership[]) public ownershipRecords;
+    mapping(string => Certificate) public certificates;
+    mapping(string => uint256) public documentPrices;
+    uint256 public totalCertificates;
 
-    event DocumentUploaded(string documentHash, string documentName, address owner, uint256 timestamp);
+    event CertificateIssued(
+        string indexed hash,
+        string name,
+        address owner,
+        uint256 timestamp,
+        string verificationProof
+    );
 
-    function uploadDocument(string memory documentHash, string memory documentName) public {
-        require(bytes(documents[documentHash].documentHash).length == 0, "Document already exists");
+    event PriceUpdated(string indexed hash, uint256 newPrice);
 
-        documents[documentHash] = Document(documentHash, documentName, block.timestamp, msg.sender);
-        ownershipRecords[documentHash].push(Ownership(msg.sender, block.timestamp));
-
-        emit DocumentUploaded(documentHash, documentName, msg.sender, block.timestamp);
-    }
-
-    function getDocumentDetails(string memory documentHash) public view returns (string memory, string memory, uint256, address) {
-        require(bytes(documents[documentHash].documentHash).length != 0, "Document not found");
+    function issueCertificate(
+        string memory _hash,
+        string memory _name,
+        uint8 _royalty,
+        string memory _verificationProof
+    ) external {
+        require(bytes(_hash).length > 0, "IPFS hash required");
+        require(bytes(_name).length > 0, "Document name required");
+        require(_royalty <= 100, "Royalty cannot exceed 100%");
+        require(bytes(certificates[_hash].hash).length == 0, "Certificate exists");
         
-        Document memory doc = documents[documentHash];
-        return (doc.documentHash, doc.documentName, doc.timestamp, doc.owner);
+        certificates[_hash] = Certificate({
+            hash: _hash,
+            name: _name,
+            timestamp: block.timestamp,
+            owner: msg.sender,
+            creator: msg.sender,
+            royalty: _royalty,
+            verificationProof: _verificationProof
+        });
+
+        documentPrices[_hash] = 0; // Initialize price
+        totalCertificates++;
+        
+        emit CertificateIssued(_hash, _name, msg.sender, block.timestamp, _verificationProof);
     }
 
-    function transferDocumentOwnership(string memory documentHash, address newOwner) public {
-        require(documents[documentHash].owner == msg.sender, "Only the owner can transfer");
-        
-        documents[documentHash].owner = newOwner;
-        ownershipRecords[documentHash].push(Ownership(newOwner, block.timestamp));
+    function updatePrice(string memory _hash, uint256 _newPrice) external {
+        require(msg.sender == certificates[_hash].owner, "Only owner can update");
+        documentPrices[_hash] = _newPrice;
+        emit PriceUpdated(_hash, _newPrice);
+    }
+
+    function getCertificate(string memory _hash) external view returns (Certificate memory) {
+        return certificates[_hash];
+    }
+
+    function getPrice(string memory _hash) external view returns (uint256) {
+        return documentPrices[_hash];
     }
 }
